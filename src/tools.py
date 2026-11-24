@@ -1,4 +1,10 @@
+import json
+import re
+from pathlib import Path
+
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+DATA = Path(__file__).parent.parent / "data"
 
 """Tools for the Bug Investigator agent, and the code that runs them safely."""
 
