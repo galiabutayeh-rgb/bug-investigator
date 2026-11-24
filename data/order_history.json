@@ -23,5 +23,18 @@
     "new_value": "12 Olive St, Haifa",
     "result": "success",
     "note": "form opened at 10:09"
+  },
+    {
+    "id": "H-105-1",
+    "order_id": "105",
+    "time": "2026-11-21T09:42:10",
+    "user_id": "avi",
+    "session": "S-C",
+    "action": "update_address",
+    "field": "delivery_address",
+    "old_value": "3 Palm St, Nazareth",
+    "new_value": "8 Pine St, Nazareth",
+    "result": "error",
+    "error": "permission_denied"
   }
 ]
