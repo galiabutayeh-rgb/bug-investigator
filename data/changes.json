@@ -1,0 +1,16 @@
+[
+  {
+    "id": "CHG-11",
+    "time": "2026-11-21T18:00:00",
+    "component": "reports",
+    "version": "3.4.0",
+    "description": "Monthly report export now uses CSV instead of Excel."
+  },
+  {
+    "id": "CHG-12",
+    "time": "2026-11-21T22:00:00",
+    "component": "orders",
+    "version": "3.4.1",
+    "description": "Address validation: postal code is now required when saving a delivery address."
+  }
+]
