@@ -3,5 +3,10 @@
     "id": "DOC-3",
     "title": "Concurrent editing",
     "content": "If two sessions edit the same order, the last full save wins. A form opened before another user's change can overwrite that change. Check the order history for saves from different sessions close in time."
+  },
+    {
+    "id": "DOC-2",
+    "title": "Permission denied",
+    "content": "A permission_denied error means the user's role does not allow the action. Check the user's role and the actions that role allows. Only an administrator can change a role."
   }
 ]
