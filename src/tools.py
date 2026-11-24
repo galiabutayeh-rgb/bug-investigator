@@ -18,3 +18,30 @@ def err(error_type, message, retryable=False):
             "retryable": retryable,
         },
     }
+# ---------- Contracts: which arguments each tool accepts ----------
+
+class SearchDocsArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    query: str = Field(min_length=2, max_length=200)
+    top_k: int = Field(default=3, ge=1, le=5)
+
+
+ARG_MODELS = {
+    "search_docs": SearchDocsArgs,
+}
+
+
+# ---------- Check: runs BEFORE any tool is executed ----------
+
+def check(name, raw_args):
+    """Return (args, None) if the request is allowed and valid, or (None, error)."""
+    if name not in ARG_MODELS:
+        return None, err("permission_denied", f"Tool '{name}' is not allowed")
+    if not isinstance(raw_args, dict):
+        return None, err("invalid_input", "Arguments must be a JSON object")
+    try:
+        args = ARG_MODELS[name](**raw_args)
+    except ValidationError as e:
+        problems = "; ".join(f"{p['loc'][0]}: {p['msg']}" for p in e.errors())
+        return None, err("invalid_input", problems)
+    return args, None
