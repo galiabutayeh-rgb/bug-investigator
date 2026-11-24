@@ -1,2 +1,7 @@
-# bug-investigator
-AI agent for investigating faults in a fictional order system - AI Agents course
+# Bug Investigator
+AI agent that helps support staff investigate faults in a fictional order system.
+AI Agents course, Yezreel Valley College, Semester A 2027.
+
+Team: Ghali Abu Tayeh, Basel Awad
+
+Status: Milestone 1 in progress.
