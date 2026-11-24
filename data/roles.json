@@ -1,0 +1,12 @@
+[
+  {
+    "id": "ROLE-agent",
+    "role": "agent",
+    "allowed_actions": ["view_order", "edit_order"]
+  },
+  {
+    "id": "ROLE-viewer",
+    "role": "viewer",
+    "allowed_actions": ["view_order"]
+  }
+]
