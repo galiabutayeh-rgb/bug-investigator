@@ -4,5 +4,11 @@
     "customer": "Fictional Customer A",
     "delivery_address": "12 Olive St, Haifa",
     "status": "processing"
+  },
+  {
+    "order_id": "105",
+    "customer": "Fictional Customer B",
+    "delivery_address": "3 Palm St, Nazareth",
+    "status": "processing"
   }
 ]
