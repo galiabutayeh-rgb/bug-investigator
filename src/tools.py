@@ -1,5 +1,7 @@
 import json
 import re
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -77,3 +79,62 @@ def search_docs(args):
                             "content": doc["content"], "score": score})
     results.sort(key=lambda r: r["score"], reverse=True)
     return {"results": results[: args.top_k]}
+# ---------- Running a tool safely ----------
+
+class TransientError(Exception):
+    """A temporary failure (service down, network). Worth retrying."""
+
+
+class ToolError(Exception):
+    """A permanent failure (e.g. order not found). Retrying will not help."""
+
+    def __init__(self, error_type, message):
+        super().__init__(message)
+        self.error_type = error_type
+        self.message = message
+
+
+TOOLS = {
+    "search_docs": search_docs,
+}
+
+
+def call_with_timeout(func, args, timeout):
+    """Run func(args), but stop waiting after `timeout` seconds (raises TimeoutError)."""
+    pool = ThreadPoolExecutor(max_workers=1)
+    try:
+        return pool.submit(func, args).result(timeout=timeout)
+    finally:
+        pool.shutdown(wait=False)
+
+
+def run_tool(name, raw_args, retries=2, timeout=5.0, sleep=time.sleep):
+    """Check the request, run the tool with retries, and always return a structured result."""
+    start = time.monotonic()
+
+    def finish(result, attempts):
+        result["attempts"] = attempts
+        result["latency_ms"] = round((time.monotonic() - start) * 1000)
+        return result
+
+    args, problem = check(name, raw_args)
+    if problem:
+        return finish(problem, 0)          # rejected: the tool never ran
+
+    for attempt in range(1, retries + 2):
+        try:
+            data = call_with_timeout(TOOLS[name], args, timeout)
+            return finish(ok(data), attempt)
+        except ToolError as e:
+            return finish(err(e.error_type, e.message), attempt)    # permanent: no retry
+        except TimeoutError:
+            last_type = "timeout"
+        except TransientError:
+            last_type = "service_unavailable"
+        except Exception:
+            return finish(err("internal_error", f"{name} failed unexpectedly"), attempt)
+
+        if attempt <= retries:
+            sleep(0.5 * 2 ** (attempt - 1))  # wait 0.5s, then 1s, ...
+
+    return finish(err(last_type, f"{name} failed after {retries + 1} attempts"), retries + 1)
