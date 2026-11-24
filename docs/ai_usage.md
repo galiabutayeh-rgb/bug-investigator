@@ -1,4 +1,4 @@
-# AI usage appendix — Ghali Abu Tayeh, Basel Awad
+# AI usage appendix — Ghali Abu Tayeh, Basel Awwad
 
 | Date | Tool and model | Purpose | Main prompts | What we used | What we fixed or checked |
 |---|---|---|---|---|---|
