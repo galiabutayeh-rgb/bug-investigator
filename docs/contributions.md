@@ -1,4 +1,4 @@
-# Contribution log — Ghali Abu Tayeh, Basel Awad
+# Contribution log — Ghali Abu Tayeh, Basel Awwad
 
 | Date | Who | What |
 |---|---|---|
