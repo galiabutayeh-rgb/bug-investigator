@@ -36,5 +36,30 @@
     "new_value": "8 Pine St, Nazareth",
     "result": "error",
     "error": "permission_denied"
+  },
+    {
+    "id": "H-106-1",
+    "order_id": "106",
+    "time": "2026-11-21T14:05:00",
+    "user_id": "dana",
+    "session": "S-D",
+    "action": "update_address",
+    "field": "delivery_address",
+    "old_value": "5 Fig St, Akko",
+    "new_value": "20 Fig St, Akko",
+    "result": "success"
+  },
+  {
+    "id": "H-106-2",
+    "order_id": "106",
+    "time": "2026-11-22T08:30:12",
+    "user_id": "dana",
+    "session": "S-E",
+    "action": "update_address",
+    "field": "delivery_address",
+    "old_value": "20 Fig St, Akko",
+    "new_value": "22 Fig St, Akko",
+    "result": "error",
+    "error": "validation_failed: postal_code required"
   }
 ]
