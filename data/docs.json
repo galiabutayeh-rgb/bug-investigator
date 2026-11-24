@@ -1,0 +1,7 @@
+[
+  {
+    "id": "DOC-3",
+    "title": "Concurrent editing",
+    "content": "If two sessions edit the same order, the last full save wins. A form opened before another user's change can overwrite that change. Check the order history for saves from different sessions close in time."
+  }
+]
