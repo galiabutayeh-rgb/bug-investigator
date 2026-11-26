@@ -47,3 +47,38 @@ def test_every_allowed_tool_has_a_contract():
         assert contract["input"] is tools.ARG_MODELS[name]
         assert contract["output"]
         assert contract["errors"]
+
+# ---------- get_order_history ----------
+
+def test_order_history_valid_input():
+    r = run_tool("get_order_history", {"order_id": "104"})
+    assert r["status"] == "ok"
+    ids = [rec["id"] for rec in r["data"]["records"]]
+    assert ids == ["H-104-1", "H-104-2"]
+
+
+def test_order_history_invalid_input():
+    r = run_tool("get_order_history", {"order_id": "104; delete"})
+    assert r["error"]["type"] == "invalid_input"
+    assert r["attempts"] == 0
+
+
+def test_order_history_unknown_order_is_not_retried():
+    r = run_tool("get_order_history", {"order_id": "999"}, sleep=no_wait)
+    assert r["error"]["type"] == "not_found"
+    assert r["attempts"] == 1
+
+
+def test_order_history_transient_failure(monkeypatch):
+    calls = {"count": 0}
+
+    def flaky_history(args):           # MOCK: fails twice, then works
+        calls["count"] += 1
+        if calls["count"] < 3:
+            raise TransientError("history service unavailable")
+        return tools.get_order_history(args)
+
+    monkeypatch.setitem(tools.TOOLS, "get_order_history", flaky_history)
+    r = run_tool("get_order_history", {"order_id": "104"}, sleep=no_wait)
+    assert r["status"] == "ok"
+    assert calls["count"] == 3
