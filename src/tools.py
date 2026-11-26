@@ -172,7 +172,20 @@ def get_order_history(args):
     records.sort(key=lambda r: r["time"])
     return {"order_id": args.order_id, "records": records}
 
-
+def check_permissions(args):
+    """Return the user's role and whether that role allows the action."""
+    users = {u["user_id"]: u["role"] for u in load_data("users.json")}
+    if args.user_id not in users:
+        raise ToolError("not_found", f"User {args.user_id} does not exist")
+    role = users[args.user_id]
+    rule = next(r for r in load_data("roles.json") if r["role"] == role)
+    return {
+        "user_id": args.user_id,
+        "role": role,
+        "action": args.action,
+        "allowed": args.action in rule["allowed_actions"],
+        "rule_id": rule["id"],
+    }
 # ---------- Running a tool safely ----------
 
 class TransientError(Exception):
