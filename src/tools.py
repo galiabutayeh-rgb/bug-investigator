@@ -266,7 +266,7 @@ def run_tool(name, raw_args, retries=2, timeout=5.0, sleep=time.sleep, approved=
         result["latency_ms"] = round((time.monotonic() - start) * 1000)
         return result
 
-    args, problem = check(name, raw_args)
+    args, problem = check(name, raw_args, approved)
     if problem:
         return finish(problem, 0)          # rejected: the tool never ran
 
