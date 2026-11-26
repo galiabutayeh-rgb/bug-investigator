@@ -159,3 +159,57 @@ def test_changes_transient_failure(monkeypatch):
                  sleep=no_wait)
     assert r["status"] == "ok"
     assert calls["count"] == 3
+
+
+
+
+
+# ---------- save_report ----------
+REPORT = {
+    "summary": "Suspected overwrite: a later full save from session S-B restored the old address.",
+    "conclusion": "finding",
+    "evidence_ids": ["H-104-1", "H-104-2", "DOC-3"],
+}
+
+
+def test_save_report_valid_input():
+    tools.TICKETS.clear()
+    r = run_tool("save_report", REPORT, approved=True)
+    assert r["status"] == "ok"
+    assert r["data"]["ticket_id"].startswith("T-")
+    assert len(tools.TICKETS) == 1
+
+
+def test_save_report_invalid_input():
+    tools.TICKETS.clear()
+    bad = dict(REPORT, evidence_ids=[])                 # a report must cite evidence
+    r = run_tool("save_report", bad, approved=True)
+    assert r["error"]["type"] == "invalid_input"
+    assert len(tools.TICKETS) == 0
+
+
+def test_save_report_without_approval_never_runs():
+    tools.TICKETS.clear()
+    r = run_tool("save_report", REPORT)                 # approved defaults to False
+    assert r["error"]["type"] == "approval_required"
+    assert r["attempts"] == 0
+    assert len(tools.TICKETS) == 0
+
+
+def test_save_report_transient_failure_does_not_save_twice(monkeypatch):
+    tools.TICKETS.clear()
+    calls = {"count": 0}
+
+    def save_then_lose_answer(args):   # MOCK: the save happens, but the answer is lost once
+        calls["count"] += 1
+        result = tools.save_report(args)
+        if calls["count"] == 1:
+            raise TransientError("connection dropped after saving")
+        return result
+
+    monkeypatch.setitem(tools.TOOLS, "save_report", save_then_lose_answer)
+    r = run_tool("save_report", REPORT, approved=True, sleep=no_wait)
+    assert r["status"] == "ok"
+    assert r["data"]["already_saved"] is True
+    assert calls["count"] == 2
+    assert len(tools.TICKETS) == 1                      # still only one ticket
