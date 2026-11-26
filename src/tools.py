@@ -208,6 +208,20 @@ def get_changes(args):
     return {"changes": changes}
 
 
+
+TICKETS = {}   # MOCK ticket store: lives in memory only, nothing is written to disk
+
+
+def save_report(args):
+    """Save the report once. The same report saved again returns the same ticket."""
+    content = json.dumps(args.model_dump(), sort_keys=True)
+    key = hashlib.sha256(content.encode()).hexdigest()[:8]     # idempotency key
+    if key in TICKETS:
+        return {"ticket_id": TICKETS[key]["ticket_id"], "already_saved": True}
+    ticket_id = f"T-{key}"
+    TICKETS[key] = {"ticket_id": ticket_id, "report": args.model_dump()}
+    return {"ticket_id": ticket_id, "already_saved": False}
+
 # ---------- Running a tool safely ----------
 
 class TransientError(Exception):
