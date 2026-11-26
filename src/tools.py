@@ -257,7 +257,7 @@ def call_with_timeout(func, args, timeout):
         pool.shutdown(wait=False)
 
 
-def run_tool(name, raw_args, retries=2, timeout=5.0, sleep=time.sleep):
+def run_tool(name, raw_args, retries=2, timeout=5.0, sleep=time.sleep, approved=False):
     """Check the request, run the tool with retries, and always return a structured result."""
     start = time.monotonic()
 
