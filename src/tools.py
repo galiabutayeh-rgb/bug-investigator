@@ -122,6 +122,7 @@ ARG_MODELS = {
     "get_order_history": GetOrderHistoryArgs,
     "check_permissions": CheckPermissionsArgs,
     "get_changes": GetChangesArgs,
+    "save_report": SaveReportArgs,
 }
 
 
@@ -242,6 +243,8 @@ TOOLS = {
     "get_order_history": get_order_history,
     "check_permissions": check_permissions,
     "get_changes": get_changes,
+    "save_report": save_report,
+
 }
 
 
