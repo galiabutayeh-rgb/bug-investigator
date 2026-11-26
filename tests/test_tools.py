@@ -82,3 +82,38 @@ def test_order_history_transient_failure(monkeypatch):
     r = run_tool("get_order_history", {"order_id": "104"}, sleep=no_wait)
     assert r["status"] == "ok"
     assert calls["count"] == 3
+# ---------- check_permissions ----------
+def test_permissions_valid_input():
+    r = run_tool("check_permissions", {"user_id": "avi", "action": "edit_order"})
+    assert r["status"] == "ok"
+    assert r["data"]["role"] == "viewer"
+    assert r["data"]["allowed"] is False
+    assert r["data"]["rule_id"] == "ROLE-viewer"
+
+
+def test_permissions_invalid_input():
+    r = run_tool("check_permissions", {"user_id": "avi"})          # action is missing
+    assert r["error"]["type"] == "invalid_input"
+    assert r["attempts"] == 0
+
+
+def test_permissions_unknown_user_is_not_retried():
+    r = run_tool("check_permissions", {"user_id": "ghost", "action": "edit_order"}, sleep=no_wait)
+    assert r["error"]["type"] == "not_found"
+    assert r["attempts"] == 1
+
+
+def test_permissions_transient_failure(monkeypatch):
+    calls = {"count": 0}
+
+    def flaky_permissions(args):       # MOCK: fails twice, then works
+        calls["count"] += 1
+        if calls["count"] < 3:
+            raise TransientError("permissions service unavailable")
+        return tools.check_permissions(args)
+
+    monkeypatch.setitem(tools.TOOLS, "check_permissions", flaky_permissions)
+    r = run_tool("check_permissions", {"user_id": "dana", "action": "edit_order"}, sleep=no_wait)
+    assert r["status"] == "ok"
+    assert r["data"]["allowed"] is True
+    assert calls["count"] == 3
