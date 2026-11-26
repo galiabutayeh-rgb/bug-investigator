@@ -119,6 +119,7 @@ ARG_MODELS = {
     "search_docs": SearchDocsArgs,
     "get_order_history": GetOrderHistoryArgs,
     "check_permissions": CheckPermissionsArgs,
+    "get_changes": GetChangesArgs,
 }
 
 
@@ -187,6 +188,20 @@ def check_permissions(args):
         "allowed": args.action in rule["allowed_actions"],
         "rule_id": rule["id"],
     }
+
+def get_changes(args):
+    """Return system changes to one component between start and end, oldest first."""
+    if args.end < args.start:
+        raise ToolError("invalid_input", "end must be after start")
+    changes = []
+    for change in load_data("changes.json"):
+        when = datetime.fromisoformat(change["time"])
+        if change["component"] == args.component and args.start <= when <= args.end:
+            changes.append(change)
+    changes.sort(key=lambda c: c["time"])
+    return {"changes": changes}
+
+
 # ---------- Running a tool safely ----------
 
 class TransientError(Exception):
@@ -206,6 +221,7 @@ TOOLS = {
     "search_docs": search_docs,
     "get_order_history": get_order_history,
     "check_permissions": check_permissions,
+    "get_changes": get_changes,
 }
 
 
