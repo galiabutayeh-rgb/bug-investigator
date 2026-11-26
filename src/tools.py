@@ -1,11 +1,12 @@
 import json
 import re
 import time
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
-
 DATA = Path(__file__).parent.parent / "data"
 
 """Tools for the Bug Investigator agent, and the code that runs them safely."""
