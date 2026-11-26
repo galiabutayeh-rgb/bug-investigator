@@ -1,10 +1,12 @@
 import json
 import re
+import hashlib
 import time
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Literal
+
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 DATA = Path(__file__).parent.parent / "data"
@@ -125,12 +127,16 @@ ARG_MODELS = {
 
 # ---------- Check: runs BEFORE any tool is executed ----------
 
-def check(name, raw_args):
+
+WRITE_TOOLS = {"save_report"}
+
+
+def check(name, raw_args, approved=False):
     """Return (args, None) if the request is allowed and valid, or (None, error)."""
     if name not in ARG_MODELS:
         return None, err("permission_denied", f"Tool '{name}' is not allowed")
-    if not isinstance(raw_args, dict):
-        return None, err("invalid_input", "Arguments must be a JSON object")
+    if name in WRITE_TOOLS and not approved:
+        return None, err("approval_required", f"{name} needs the user's approval first")
     try:
         args = ARG_MODELS[name](**raw_args)
     except ValidationError as e:
