@@ -118,6 +118,7 @@ CONTRACTS = {
 ARG_MODELS = {
     "search_docs": SearchDocsArgs,
     "get_order_history": GetOrderHistoryArgs,
+    "check_permissions": CheckPermissionsArgs,
 }
 
 
@@ -204,6 +205,7 @@ class ToolError(Exception):
 TOOLS = {
     "search_docs": search_docs,
     "get_order_history": get_order_history,
+    "check_permissions": check_permissions,
 }
 
 
