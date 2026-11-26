@@ -117,3 +117,45 @@ def test_permissions_transient_failure(monkeypatch):
     assert r["status"] == "ok"
     assert r["data"]["allowed"] is True
     assert calls["count"] == 3
+
+
+# ---------- get_changes ----------
+
+def test_changes_valid_input():
+    r = run_tool("get_changes", {"component": "orders",
+                                 "start": "2026-11-21T00:00:00", "end": "2026-11-22T23:59:59"})
+    assert r["status"] == "ok"
+    ids = [c["id"] for c in r["data"]["changes"]]
+    assert ids == ["CHG-12"]                       # CHG-11 is a reports change, so it is filtered out
+
+
+def test_changes_invalid_input():
+    r = run_tool("get_changes", {"component": "payments",
+                                 "start": "2026-11-21T00:00:00", "end": "2026-11-22T00:00:00"})
+    assert r["error"]["type"] == "invalid_input"
+    assert r["attempts"] == 0
+
+
+def test_changes_end_before_start_is_rejected():
+    r = run_tool("get_changes", {"component": "orders",
+                                 "start": "2026-11-22T00:00:00", "end": "2026-11-21T00:00:00"},
+                 sleep=no_wait)
+    assert r["error"]["type"] == "invalid_input"
+    assert r["attempts"] == 1                      # checked inside the tool, not retried
+
+
+def test_changes_transient_failure(monkeypatch):
+    calls = {"count": 0}
+
+    def flaky_changes(args):           # MOCK: fails twice, then works
+        calls["count"] += 1
+        if calls["count"] < 3:
+            raise TransientError("changes service unavailable")
+        return tools.get_changes(args)
+
+    monkeypatch.setitem(tools.TOOLS, "get_changes", flaky_changes)
+    r = run_tool("get_changes", {"component": "orders",
+                                 "start": "2026-11-21T00:00:00", "end": "2026-11-22T23:59:59"},
+                 sleep=no_wait)
+    assert r["status"] == "ok"
+    assert calls["count"] == 3
