@@ -37,3 +37,13 @@ def test_search_docs_transient_failure(monkeypatch):
     assert r["status"] == "ok"
     assert calls["count"] == 3
     assert r["attempts"] == 3
+
+
+---------- contracts ----------
+def test_every_allowed_tool_has_a_contract():
+    for name in tools.ARG_MODELS:
+        contract = tools.CONTRACTS[name]
+        assert contract["description"]
+        assert contract["input"] is tools.ARG_MODELS[name]
+        assert contract["output"]
+        assert contract["errors"]
