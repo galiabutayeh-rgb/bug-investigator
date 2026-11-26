@@ -160,6 +160,16 @@ def search_docs(args):
                             "content": doc["content"], "score": score})
     results.sort(key=lambda r: r["score"], reverse=True)
     return {"results": results[: args.top_k]}
+    
+def get_order_history(args):
+    """Return all history records of one order, oldest first."""
+    order_ids = [o["order_id"] for o in load_data("orders.json")]
+    if args.order_id not in order_ids:
+        raise ToolError("not_found", f"Order {args.order_id} does not exist")
+    records = [r for r in load_data("order_history.json") if r["order_id"] == args.order_id]
+    records.sort(key=lambda r: r["time"])
+    return {"order_id": args.order_id, "records": records}
+    
 # ---------- Running a tool safely ----------
 
 class TransientError(Exception):
